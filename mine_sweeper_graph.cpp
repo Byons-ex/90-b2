@@ -61,7 +61,6 @@ void paintFieldWithStr(MineField* field, const char *head[], int headCount, cons
 	FieldSize(field, w, h);
 
 	cct_cls();
-
 	
 	if (headCount > 0)
 	{
@@ -154,3 +153,110 @@ void paintFieldWithStr(MineField* field, const char *head[], int headCount, cons
 	}
 }
 
+
+void InitGraph(MineField* field)
+{
+	unsigned w, h;
+	FieldSize(field, w, h);
+	cct_setconsoleborder(6 * w + 6, 3 * h + 5);
+
+	// 画行标题
+	int y = 0;
+	char title = 'A';
+	for (unsigned i = 0; i < h; ++i)
+	{
+		y += 3;
+		cct_showch(0, y, title);
+		++title;
+	}
+
+	// 画列标题
+	int x = 0;
+	title = '1';
+	for (unsigned i = 0; i < w; ++i)
+	{
+		x += 6;
+		cct_showch(x, 1, title);
+		++title;
+
+		if (title == ':')
+			title = 'a';
+	}
+
+	// 画═
+	x = y = 2;
+	for (int i = 0; i < w * 3 + 1; ++i)
+	{
+		y = 2;
+		for (int j = 0; j < h + 1; ++j)
+		{
+			cct_showstr(x, y, "═", COLOR_HWHITE, COLOR_BLACK);
+			y += 3;
+		}
+		x += 2;
+	}
+
+	// 画║
+	x = y = 2;
+	for (int i = 0; i < w + 1; ++i)
+	{
+		y = 2;
+		for (int j = 0; j < h * 3 + 1; ++j)
+		{
+			cct_showstr(x, y, "║", COLOR_HWHITE, COLOR_BLACK);
+			y += 1;
+		}
+		x += 6;
+	}
+
+	// 画四个角
+	cct_showstr(2, 2, "╔", COLOR_HWHITE, COLOR_BLACK);
+	cct_showstr(2, 2 + 3 * h, "╚", COLOR_HWHITE, COLOR_BLACK);
+	cct_showstr(2 + w * 6, 2, "╗", COLOR_HWHITE, COLOR_BLACK);
+	cct_showstr(2 + w * 6, 2 + 3 * h, "╝", COLOR_HWHITE, COLOR_BLACK);
+
+	// 画╠.╣
+	y = 2;
+	for (int i = 0; i < h - 1; ++i)
+	{
+		y += 3;
+		cct_showstr(2, y, "╠", COLOR_HWHITE, COLOR_BLACK);
+		cct_showstr(2 + w * 6, y, "╣", COLOR_HWHITE, COLOR_BLACK);
+	}
+
+	// 画╦.╩
+	x = 2;
+	for (int i = 0; i < w - 1; ++i)
+	{
+		x += 6;
+		cct_showstr(x, 2, "╦", COLOR_HWHITE, COLOR_BLACK);
+		cct_showstr(x, 2 + h * 3, "╩", COLOR_HWHITE, COLOR_BLACK);
+	}
+
+	// 画╬
+	x = y = 2;
+	for (int i = 0; i < w - 1; ++i)
+	{
+		x += 6;
+		y = 2;
+		for (int j = 0; j < h - 1; ++j)
+		{
+			y += 3;
+			cct_showstr(x, y, "╬", COLOR_HWHITE, COLOR_BLACK);
+		}
+	}
+}
+
+void setGraphGrid(MineField* field, unsigned x, unsigned y, char stuff)
+{
+	unsigned w, h;
+	FieldSize(field, w, h);
+
+	switch (stuff)
+	{
+	case FLAG:
+
+	default:
+		break;
+	}
+}

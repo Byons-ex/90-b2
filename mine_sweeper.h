@@ -16,7 +16,6 @@ enum GRID_STATUS
 int showMainMenu();
 void showLevelMenu(unsigned& w, unsigned &h, unsigned& mineCount);
 
-
 MineField* initMineField(unsigned w, unsigned h, unsigned mineCount);
 void uninitMineField(MineField* field);
 void FieldSize(MineField* field, unsigned& w, unsigned& h);
@@ -33,6 +32,10 @@ void paintFieldWithStr(MineField* field, const char* head[], int headCount, cons
 void launchMode_2(unsigned w, unsigned h, unsigned mineCount);
 void launchMode_3(unsigned w, unsigned h, unsigned mineCount);
 void launchMode_4(unsigned w, unsigned h, unsigned mineCount);
+void launchMode_5(unsigned w, unsigned h, unsigned mineCount);
+
+void InitGraph(MineField *field);
+void setGraphGrid(MineField *field, unsigned x, unsigned y, char stuff);
 
 int waitKeyDown(unsigned w, unsigned h, GRID_STATUS &flag, unsigned& x, unsigned& y);
 

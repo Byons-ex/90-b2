@@ -6,8 +6,8 @@
 
 int main(void)
 {
-	cct_setfontsize("Terminal", 20, 10);
-	cct_disable_mouse();
+	cct_setfontsize("Terminal", 16, 8);
+	//cct_disable_mouse();
 	int model = showMainMenu();
 
 	while (model != 0)
@@ -30,8 +30,8 @@ int main(void)
 			launchMode_4(w, h, mineCount);
 			break;
 		case 5:
-
-
+			launchMode_5(w, h, mineCount);
+			break;
 		case 6:
 
 
@@ -115,7 +115,10 @@ void launchMode_3(unsigned w, unsigned h, unsigned mineCount)
 		}
 
 		if (ret != 0)
+		{
+			paintFieldWithStr(field, head, 1, rear, 1);
 			continue;
+		}
 
 		ret = clear(field, x, y);
 		if (ret == -1)
@@ -206,6 +209,17 @@ void launchMode_4(unsigned w, unsigned h, unsigned mineCount)
 		rear[1] = "¹§Ï²Äã£¬Ê¤ÀûÁË";
 		paintFieldWithStr(field, head, headCount, rear + 1, 2);
 	}
+
+	waitPressEnter();
+	uninitMineField(field);
+}
+
+void launchMode_5(unsigned w, unsigned h, unsigned mineCount)
+{
+	MineField* field = initMineField(w, h, mineCount);
+
+	InitGraph(field);
+	
 
 	waitPressEnter();
 	uninitMineField(field);
