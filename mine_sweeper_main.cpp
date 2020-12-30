@@ -1,8 +1,7 @@
 #include "cmd_console_tools.h"
 #include "mine_sweeper.h"
 #include <stdlib.h>
-
-#include <iostream>
+#include <Windows.h>
 
 
 int main(void)
@@ -28,8 +27,8 @@ int main(void)
 			launchMode_3(w, h, mineCount);
 			break;
 		case 4:
-
-
+			launchMode_4(w, h, mineCount);
+			break;
 		case 5:
 
 
@@ -57,8 +56,8 @@ int main(void)
 
 void launchMode_1(unsigned w, unsigned h, unsigned mineCount)
 {
-	MineField* mineField = allocMineField(w, h);
-	initMineField(mineField, mineCount, 0, 0);
+	MineField* mineField = initMineField(w, h, mineCount);
+	clear(mineField, 0, 0);
 	paintMode_1(mineField);
 
 	while (true)
@@ -69,90 +68,145 @@ void launchMode_1(unsigned w, unsigned h, unsigned mineCount)
 			break;
 	}
 
-	freeMineField(mineField);
+	uninitMineField(mineField);
 }
 
 void launchMode_2(unsigned w, unsigned h, unsigned mineCount)
 {
-	MineField* field = allocMineField(w, h);
+	MineField* field = initMineField(w, h, mineCount);
 
-	paintMode_2(field);
-	
-	int mx, my;
-	cct_getxy(mx, my);
-	cct_showstr(0, my + 2, "输入非雷位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
+	const char* head[] = {"内部数组："};
+	const char* rear[] = {"输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：",
+						  "按回车键退出..." };
+	paintFieldWithStr(field, head, 1, rear, 1);
 
 	unsigned x, y;
-	getPosFromKey(w, h, x, y);
-
-	initMineField(field, mineCount, x, y);
-	clear(field, x, y);
-
-	paintMode_2(field);
-	cct_getxy(mx, my);
-	cct_showstr(0, my + 2, "按回车键继续...");
-
-	while (true)
+	GRID_STATUS flag;
+	if (waitKeyDown(w, h, flag, x, y) != -1)
 	{
-		int mx, my, ma, k1, k2;
-		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
-		if (k1 == 0x0D)
-			break;
+		clear(field, x, y);
+		paintFieldWithStr(field, head, 1, rear + 1, 1);
 	}
+	waitPressEnter();
 
-	freeMineField(field);
+	uninitMineField(field);
 }
 
 void launchMode_3(unsigned w, unsigned h, unsigned mineCount)
 {
-	MineField* field = allocMineField(w, h);
+	MineField* field = initMineField(w, h, mineCount);
 
-	paintMode_2(field);
-	int mx, my;
-	cct_getxy(mx, my);
-	cct_showstr(0, my + 2, "输入非雷位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
+	const char* head[] = { "字符界面：" };
+	const char* rear[] = { "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：",
+						   "按回车键退出..."};
 
-	unsigned kx, ky;
-	getPosFromKey(w, h, kx, ky);
+	paintFieldWithStr(field, head, 1, rear, 1);
 
-	initMineField(field, mineCount, kx, ky);
-	auto ret = clear(field, kx, ky);
-
-	while (ret == 0)
+	unsigned x, y;
+	auto ret = 0;
+	GRID_STATUS	flag;
+	while (true)
 	{
-		paintMode_2(field);
-		int mx, my;
-		cct_getxy(mx, my);
-		cct_showstr(0, my + 2, "输入非雷位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
+		ret = waitKeyDown(w, h, flag, x, y);
+		if (ret == -1)
+		{
+			ret = -2;
+			break;
+		}
 
-		unsigned kx, ky;
-		getPosFromKey(w, h, kx, ky);
-		ret = clear(field, kx, ky);
+		if (ret != 0)
+			continue;
+
+		ret = clear(field, x, y);
+		if (ret == -1)
+			break;
+
+		paintFieldWithStr(field, head, 1, rear, 1);
+	}
+
+	if (ret == -2)
+	{
+		paintFieldWithStr(field, head, 1, rear + 1, 1);
 	}
 
 	if (ret == -1)
 	{
-		paintMode_2(field);
-		int mx, my;
-		cct_getxy(mx, my);
-		cct_showstr(0, my + 2, "真可惜，失败了");
+		rear[0] = "真可惜，失败了";
+		paintFieldWithStr(field, head, 1, rear, 2);
 	}
 
 	if (ret == 1)
 	{
-		paintMode_2(field);
-		int mx, my;
-		cct_getxy(mx, my);
-		cct_showstr(0, my + 2, "恭喜，你胜利了");
+		rear[0] = "恭喜你，胜利了";
+		paintFieldWithStr(field, head, 1, rear, 2);
 	}
 
-	cct_showstr(0, my + 3, "按回车键退出...");
+	waitPressEnter();
+	uninitMineField(field);
+}
 
+void launchMode_4(unsigned w, unsigned h, unsigned mineCount)
+{
+	const char* head[2] = {NULL, "字符界面："};  // 预留一个元素，待会能显示时间
+	const char* rear[] = { "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出），显示或更新游戏时间按空格。",
+						   "前缀[?!]以标志该位置，而不是清理该位置，例如：!G1 ?Af，清除当前标志使用[~],如~Af： ",
+						   "按回车键退出..." };
+
+	int headCount = 1;
+
+	MineField* field = initMineField(w, h, mineCount);
+	paintFieldWithStr(field, head + 1, 1, rear, 2);
+	auto startTime = GetTickCount64();
+	auto ret = 0;
 	while (true)
 	{
-		int mx, my, ma, k1, k2;
-		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
-		if (k1 == 0x0D)
+		unsigned x, y;
+		GRID_STATUS flag;
+		ret = waitKeyDown(w, h, flag, x, y);
+		if (ret == -1)
+		{
+			paintFieldWithStr(field, head, headCount, rear + 2, 1);
+			waitPressEnter();
+			uninitMineField(field);
+			return;
+		}
+
+		if (ret == 1)
+		{
+			if (head[0] != NULL)
+				delete head[0];
+			head[0] = timeToSecString(GetTickCount64() - startTime);
+			headCount = 2;
+			paintFieldWithStr(field, head, headCount, rear, 2);
+			continue;
+		}
+		
+		if (ret == 2)
+		{
+			setStatus(field, x, y, flag);
+			paintFieldWithStr(field, head, headCount, rear, 2);
+			continue;
+		}
+
+		ret = clear(field, x, y);
+		if (ret != 0)
 			break;
+
+		paintFieldWithStr(field, head, headCount, rear, 2);
 	}
+
+	if (ret == -1)
+	{
+		rear[1] = "真可惜，失败了";
+		paintFieldWithStr(field, head, headCount, rear + 1, 2);
+	}
+
+	if (ret == 1)
+	{
+		rear[1] = "恭喜你，胜利了";
+		paintFieldWithStr(field, head, headCount, rear + 1, 2);
+	}
+
+	waitPressEnter();
+	uninitMineField(field);
 }

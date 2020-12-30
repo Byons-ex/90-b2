@@ -1,20 +1,67 @@
 #include "cmd_console_tools.h"
 #include "mine_sweeper.h"
+#include <string.h>
+#include <stdio.h>
 
-void getPosFromKey(unsigned w, unsigned h, unsigned& x, unsigned& y)
+int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned& y)
 {
 	int mx, my, ma, k1 = 0x7FFFFFFF, k2;
-	int yPos;
+	bool isQuit = false;
+	int ret = 0;
+	y = 0xFFFFFFFF;
 
-	while (k1 < 'A' || k1 >= 'A' + h) 
+	while (!isQuit)
 	{
 		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
-	}
-	
-	y = k1 - 'A';
+		switch (k1)
+		{
+		case '!':
+			flag = FLAG;
+			isQuit = true;
+			break;
 
-	cct_getxy(mx, my);
-	cct_showch(mx, my, k1);
+		case '?':
+			flag = DOUBT;
+			isQuit = true;
+			break;
+
+		case '~':
+			flag = UNKNOWN;
+			isQuit = true;
+			break;
+
+		case 'Q':
+		case 'q':
+			return -1;
+
+		case ' ':
+			return 1;
+
+		default:
+			if (k1 >= 'A' && k1 < 'A' + h)
+			{
+				cct_getxy(mx, my);
+				cct_showch(mx, my, k1);
+				y = k1 - 'A';
+				isQuit = true;
+			}
+			continue;
+		}
+
+		cct_getxy(mx, my);
+		cct_showch(mx, my, k1);
+	}
+
+	if (y == 0xFFFFFFFF)
+	{
+		while (k1 < 'A' || k1 >= 'A' + h)
+			cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
+
+		cct_getxy(mx, my);
+		cct_showch(mx, my, k1);
+		y = k1 - 'A';
+		ret = 2;
+	}
 
 	k1 = 0x7FFFFFFF;
 	while (true)
@@ -27,14 +74,14 @@ void getPosFromKey(unsigned w, unsigned h, unsigned& x, unsigned& y)
 				x = k1 - '1';
 				cct_getxy(mx, my);
 				cct_showch(mx, my, k1);
-				return;
+				return ret;
 			}
 			else if (k1 <= 'a' + w - 9 && k1 >= 'a')
 			{
 				x = k1 - 'a' + 9;
 				cct_getxy(mx, my);
 				cct_showch(mx, my, k1);
-				return;
+				return ret;
 			}
 		}
 		else
@@ -44,10 +91,29 @@ void getPosFromKey(unsigned w, unsigned h, unsigned& x, unsigned& y)
 				x = k1 - '1';
 				cct_getxy(mx, my);
 				cct_showch(mx, my, k1);
-				return;
+				return ret;
 			}
 		}
 	}
 
 	x = y = 0;
+	return ret;
+}
+
+void waitPressEnter()
+{
+	while (true)
+	{
+		int mx, my, ma, k1, k2;
+		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
+		if (k1 == 0x0D)
+			break;
+	}
+}
+
+char* timeToSecString(uint64_t ms)
+{
+	char* str = new char[32];
+	sprintf_s(str, 32, "当前时间%.3f秒", (int)ms / 1000.0f);
+	return str;
 }

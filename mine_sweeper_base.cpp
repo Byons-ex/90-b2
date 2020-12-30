@@ -11,6 +11,7 @@ typedef struct MineField_
 	unsigned w, h;
 	unsigned mineCount;
 	unsigned safeZone;
+	bool inited;
 }MineField;
 
 void RandMines(MineField* field, unsigned reservedX, unsigned reservedY)
@@ -64,7 +65,7 @@ void markMineAround(MineField* field, unsigned w, unsigned h)
 	}
 }
 
-MineField* allocMineField(unsigned w, unsigned h)
+MineField* initMineField(unsigned w, unsigned h, unsigned mineCount)
 {
 	MineField* field = new MineField;
 	field->field = new unsigned char[w * h];
@@ -74,17 +75,11 @@ MineField* allocMineField(unsigned w, unsigned h)
 
 	field->w = w;
 	field->h = h;
-	field->mineCount = 0;
+	field->mineCount = mineCount;
+	field->inited = false;
+	field->safeZone = w * h - mineCount;
 
 	return field;
-}
-
-void initMineField(MineField *field, unsigned mineCount, unsigned reservedX, unsigned reservedY)
-{
-	field->mineCount = mineCount;
-	field->safeZone = field->w * field->h - mineCount;
-	RandMines(field, reservedX, reservedY);
-	markMineAround(field, field->w, field->h);
 }
 
 void FieldSize(MineField* field, unsigned& w, unsigned& h)
@@ -106,6 +101,13 @@ unsigned char internalGrid(MineField* field, unsigned x, unsigned y)
 
 int clear(MineField* field, unsigned x, unsigned y)
 {
+	if (field->inited == false)
+	{
+		RandMines(field, x, y);
+		markMineAround(field, field->w, field->h);
+		field->inited = true;
+	}
+
 	if (*(field->field + y * field->w + x) == '*')
 	{
 		*(field->status + y * field->w + x) = CLEAN;
@@ -145,25 +147,13 @@ int clear(MineField* field, unsigned x, unsigned y)
 	return 0;
 }
 
-void markFlag(MineField* field, unsigned x, unsigned y)
+void setStatus(MineField* field, unsigned x, unsigned y, GRID_STATUS status)
 {
-	if ((*(field->status + y * field->w + x)) != CLEAN)
-		(*(field->status + y * field->w + x)) = FLAG;
+	if ((*(field->status + y * field->w + x)) != CLEAN && status != CLEAN)
+		(*(field->status + y * field->w + x)) = status;
 }
 
-void markDoubt(MineField* field, unsigned x, unsigned y)
-{
-	if ((*(field->status + y * field->w + x)) != CLEAN)
-		(*(field->status + y * field->w + x)) = DOUBT;
-}
-
-void cleanStatus(MineField* field, unsigned x, unsigned y)
-{
-	if ((*(field->status + y * field->w + x)) != CLEAN)
-		(*(field->status + y * field->w + x)) = UNKNOWN;
-}
-
-void freeMineField(MineField* field)
+void uninitMineField(MineField* field)
 {
 	delete[] field->field;
 	delete[] field->status;
