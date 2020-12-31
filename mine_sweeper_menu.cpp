@@ -33,7 +33,7 @@ int showMainMenu()
 	return select - '0';
 }
 
-void showLevelMenu(unsigned& w, unsigned& h, unsigned& mineCount)
+void showLevelMenu(int& w, int& h, int& mineCount)
 {
 	int select = -1;
 	int mX, mY, key2, mAction;

@@ -2,13 +2,14 @@
 #include "mine_sweeper.h"
 #include <string.h>
 #include <stdio.h>
+#include <Windows.h>
 
-int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned& y)
+int waitKeyDown(int w, int h, char& flag, int& x, int& y)
 {
 	int mx, my, ma, k1 = 0x7FFFFFFF, k2;
 	bool isQuit = false;
 	int ret = 0;
-	y = 0xFFFFFFFF;
+	y = 0x7FFFFFFF;
 
 	while (!isQuit)
 	{
@@ -16,17 +17,17 @@ int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned
 		switch (k1)
 		{
 		case '!':
-			flag = FLAG;
+			flag = '!';
 			isQuit = true;
 			break;
 
 		case '?':
-			flag = DOUBT;
+			flag = '?';
 			isQuit = true;
 			break;
 
 		case '~':
-			flag = UNKNOWN;
+			flag = ' ';
 			isQuit = true;
 			break;
 
@@ -38,7 +39,7 @@ int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned
 			return 1;
 
 		default:
-			if (k1 >= 'A' && k1 < 'A' + h)
+			if (k1 >= 'A' && k1 < 'A' + (int)h)
 			{
 				cct_getxy(mx, my);
 				cct_showch(mx, my, k1);
@@ -52,9 +53,9 @@ int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned
 		cct_showch(mx, my, k1);
 	}
 
-	if (y == 0xFFFFFFFF)
+	if (y == 0x7FFFFFFF)
 	{
-		while (k1 < 'A' || k1 >= 'A' + h)
+		while (k1 < 'A' || k1 >= 'A' + (int)h)
 			cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
 
 		cct_getxy(mx, my);
@@ -76,7 +77,7 @@ int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned
 				cct_showch(mx, my, k1);
 				return ret;
 			}
-			else if (k1 <= 'a' + w - 9 && k1 >= 'a')
+			else if (k1 <= 'a' + (int)w - 9 && k1 >= 'a')
 			{
 				x = k1 - 'a' + 9;
 				cct_getxy(mx, my);
@@ -98,6 +99,24 @@ int waitKeyDown(unsigned w, unsigned h, GRID_STATUS& flag, unsigned& x, unsigned
 
 	x = y = 0;
 	return ret;
+}
+
+char* mousePosToFieldPos(int mx, int my, int fw, int fh, int& fx, int& fy)
+{
+	mx -= 2;
+	my -= 2;
+
+	if (mx / 6 >= fw || mx % 6 < 2 || my / 3 >= fh || my % 3 < 1)
+		return NULL;
+
+	fx = mx / 6;
+	fy = my / 3;
+
+	char *str = new char[32];
+	char sx = fx < 9 ? fx + '1' : fx - 9 + 'a';
+	char sy = fy + 'A';
+	sprintf_s(str, 32, "µ±Ç°Î»ÖÃ£º%c, %c", sy, sx);
+	return str;
 }
 
 void waitPressEnter()

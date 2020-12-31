@@ -6,25 +6,25 @@
 
 typedef struct MineField_
 {
-	unsigned char *field;
-	unsigned char *status;
-	unsigned w, h;
-	unsigned mineCount;
-	unsigned safeZone;
+	char *field;
+	char *status;
+	int w, h;
+	int mineCount;
+	int safeZone;
 	bool inited;
 }MineField;
 
-void RandMines(MineField* field, unsigned reservedX, unsigned reservedY)
+void RandMines(MineField* field, int reservedX, int reservedY)
 {
 	srand((unsigned int)time(NULL));
-	for (unsigned i = 0; i < field->mineCount; ++i)
+	for (int i = 0; i < field->mineCount; ++i)
 	{
 		int pos = rand() % (field->w * field->h - field->mineCount - 9) + field->mineCount + 9;
 		field->field[i] = field->field[pos];
 		field->field[pos] = '*';
 	}
 
-	unsigned reservedSection = field->mineCount;
+	int reservedSection = field->mineCount;
 	for (int x = -1; x <= 1; ++x)
 	{
 		for (int y = -1; y <= 1; ++y)
@@ -40,11 +40,11 @@ void RandMines(MineField* field, unsigned reservedX, unsigned reservedY)
 	}
 }
 
-void markMineAround(MineField* field, unsigned w, unsigned h)
+void markMineAround(MineField* field, int w, int h)
 {
-	for (unsigned x = 0; x < w; ++x)
+	for (int x = 0; x < w; ++x)
 	{
-		for (unsigned y = 0; y < h; ++y)
+		for (int y = 0; y < h; ++y)
 		{
 			if (*(field->field + y * w + x) != '*')
 				continue;
@@ -65,13 +65,13 @@ void markMineAround(MineField* field, unsigned w, unsigned h)
 	}
 }
 
-MineField* initMineField(unsigned w, unsigned h, unsigned mineCount)
+MineField* initMineField(int w, int h, int mineCount)
 {
 	MineField* field = new MineField;
-	field->field = new unsigned char[w * h];
-	memset(field->field, '0', w * h * sizeof(unsigned char));
+	field->field = new char[w * h];
+	memset(field->field, '0', w * h * sizeof(char));
 
-	field->status = new unsigned char[w * h]();
+	field->status = new char[w * h]();
 
 	field->w = w;
 	field->h = h;
@@ -82,24 +82,24 @@ MineField* initMineField(unsigned w, unsigned h, unsigned mineCount)
 	return field;
 }
 
-void FieldSize(MineField* field, unsigned& w, unsigned& h)
+void FieldSize(MineField* field, int& w, int& h)
 {
 	w = field->w;
 	h = field->h;
 }
 
-unsigned char grid(MineField* field, unsigned x, unsigned y)
+char grid(MineField* field, int x, int y)
 {
-	return (*(field->status + y * field->w + x)) == CLEAN ? 
+	return (*(field->status + y * field->w + x)) == 0 ? 
 		*(field->field + y * field->w + x) : (*(field->status + y * field->w + x));
 }
 
-unsigned char internalGrid(MineField* field, unsigned x, unsigned y)
+char internalGrid(MineField* field, int x, int y)
 {
 	return *(field->field + y * field->w + x);
 }
 
-int clear(MineField* field, unsigned x, unsigned y)
+int clear(MineField* field, int x, int y)
 {
 	if (field->inited == false)
 	{
@@ -110,23 +110,23 @@ int clear(MineField* field, unsigned x, unsigned y)
 
 	if (*(field->field + y * field->w + x) == '*')
 	{
-		*(field->status + y * field->w + x) = CLEAN;
+		*(field->status + y * field->w + x) = ' ';
 		return -1;
 	}
 
-	if (*(field->field + y * field->w + x) > '0' && *(field->status + y * field->w + x) != CLEAN)
+	if (*(field->field + y * field->w + x) > '0' && *(field->status + y * field->w + x) != ' ')
 	{
-		*(field->status + y * field->w + x) = CLEAN;
+		*(field->status + y * field->w + x) = ' ';
 		--field->safeZone;
 		if (field->safeZone == 0)
 			return 1;
 		return 0;
 	}
 
-	if (*(field->status + y * field->w + x) == CLEAN)
+	if (*(field->status + y * field->w + x) == ' ')
 		return 0;
 
-	*(field->status + y * field->w + x) = CLEAN;
+	*(field->status + y * field->w + x) = ' ';
 	--field->safeZone;
 	if (field->safeZone == 0)
 		return 1;
@@ -147,9 +147,60 @@ int clear(MineField* field, unsigned x, unsigned y)
 	return 0;
 }
 
-void setStatus(MineField* field, unsigned x, unsigned y, GRID_STATUS status)
+int clear(MineField* field, int x, int y, CLEAR_CALLBACK callback)
 {
-	if ((*(field->status + y * field->w + x)) != CLEAN && status != CLEAN)
+	if (field->inited == false)
+	{
+		RandMines(field, x, y);
+		markMineAround(field, field->w, field->h);
+		field->inited = true;
+	}
+
+	if (*(field->field + y * field->w + x) == '*')
+	{
+		*(field->status + y * field->w + x) = 0;
+		callback(field, x, y, *(field->field + y * field->w + x));
+		return -1;
+	}
+
+	if (*(field->field + y * field->w + x) > '0' && *(field->status + y * field->w + x) != ' ')
+	{
+		*(field->status + y * field->w + x) = 0;
+		callback(field, x, y, *(field->field + y * field->w + x));
+		--field->safeZone;
+		if (field->safeZone == 0)
+			return 1;
+		return 0;
+	}
+
+	if (*(field->status + y * field->w + x) == ' ')
+		return 0;
+
+	*(field->status + y * field->w + x) = 0;
+	callback(field, x, y, *(field->field + y * field->w + x));
+	--field->safeZone;
+	if (field->safeZone == 0)
+		return 1;
+
+	for (int offX = -1; offX <= 1; ++offX)
+	{
+		for (int offY = -1; offY <= 1; ++offY)
+		{
+			if (x + offX >= 0 && x + offX < field->w &&
+				y + offY >= 0 && y + offY < field->h)
+			{
+				if (clear(field, x + offX, y + offY) == 1)
+					return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+void setStatus(MineField* field, int x, int y, char status)
+{
+	if ((*(field->status + y * field->w + x)) != ' ' && status != ' ')
 		(*(field->status + y * field->w + x)) = status;
 }
 

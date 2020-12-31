@@ -12,7 +12,7 @@ int main(void)
 
 	while (model != 0)
 	{
-		unsigned w, h, mineCount;
+		int w, h, mineCount;
 		showLevelMenu(w, h, mineCount);
 
 		switch (model)
@@ -33,8 +33,8 @@ int main(void)
 			launchMode_5(w, h, mineCount);
 			break;
 		case 6:
-
-
+			launchMode_6(w, h, mineCount);
+			break;
 		case 7:
 
 
@@ -54,7 +54,7 @@ int main(void)
 	return 0;
 }
 
-void launchMode_1(unsigned w, unsigned h, unsigned mineCount)
+void launchMode_1(int w, int h, int mineCount)
 {
 	MineField* mineField = initMineField(w, h, mineCount);
 	clear(mineField, 0, 0);
@@ -71,7 +71,7 @@ void launchMode_1(unsigned w, unsigned h, unsigned mineCount)
 	uninitMineField(mineField);
 }
 
-void launchMode_2(unsigned w, unsigned h, unsigned mineCount)
+void launchMode_2(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
@@ -80,8 +80,8 @@ void launchMode_2(unsigned w, unsigned h, unsigned mineCount)
 						  "按回车键退出..." };
 	paintFieldWithStr(field, head, 1, rear, 1);
 
-	unsigned x, y;
-	GRID_STATUS flag;
+	int x, y;
+	char flag;
 	if (waitKeyDown(w, h, flag, x, y) != -1)
 	{
 		clear(field, x, y);
@@ -92,7 +92,7 @@ void launchMode_2(unsigned w, unsigned h, unsigned mineCount)
 	uninitMineField(field);
 }
 
-void launchMode_3(unsigned w, unsigned h, unsigned mineCount)
+void launchMode_3(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
@@ -102,9 +102,9 @@ void launchMode_3(unsigned w, unsigned h, unsigned mineCount)
 
 	paintFieldWithStr(field, head, 1, rear, 1);
 
-	unsigned x, y;
+	int x, y;
 	auto ret = 0;
-	GRID_STATUS	flag;
+	char flag;
 	while (true)
 	{
 		ret = waitKeyDown(w, h, flag, x, y);
@@ -148,7 +148,7 @@ void launchMode_3(unsigned w, unsigned h, unsigned mineCount)
 	uninitMineField(field);
 }
 
-void launchMode_4(unsigned w, unsigned h, unsigned mineCount)
+void launchMode_4(int w, int h, int mineCount)
 {
 	const char* head[2] = {NULL, "字符界面："};  // 预留一个元素，待会能显示时间
 	const char* rear[] = { "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出），显示或更新游戏时间按空格。",
@@ -163,8 +163,8 @@ void launchMode_4(unsigned w, unsigned h, unsigned mineCount)
 	auto ret = 0;
 	while (true)
 	{
-		unsigned x, y;
-		GRID_STATUS flag;
+		int x, y;
+		char flag;
 		ret = waitKeyDown(w, h, flag, x, y);
 		if (ret == -1)
 		{
@@ -177,7 +177,7 @@ void launchMode_4(unsigned w, unsigned h, unsigned mineCount)
 		if (ret == 1)
 		{
 			if (head[0] != NULL)
-				delete head[0];
+				delete[] head[0];
 			head[0] = timeToSecString(GetTickCount64() - startTime);
 			headCount = 2;
 			paintFieldWithStr(field, head, headCount, rear, 2);
@@ -214,13 +214,89 @@ void launchMode_4(unsigned w, unsigned h, unsigned mineCount)
 	uninitMineField(field);
 }
 
-void launchMode_5(unsigned w, unsigned h, unsigned mineCount)
+void launchMode_5(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
 	InitGraph(field);
 	
+	clear(field, 0, 0);
 
+	for (int x = 0; x < w; ++x)
+	{
+		for(int y = 0; y < h; ++y)
+		{
+			updateGraphGrid(field, x, y, internalGrid(field, x, y));
+		}
+	}
+
+	showMsgWitGraph(field, "按回车键退出...");
+	waitPressEnter();
+	uninitMineField(field);
+}
+
+void launchMode_6(int w, int h, int mineCount)
+{
+	MineField* field = initMineField(w, h, mineCount);
+
+	InitGraph(field);
+
+	while (true)
+	{
+		int mx, my, ma, k1, k2;
+		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
+
+		if (ma == MOUSE_LEFT_BUTTON_CLICK)
+			break;
+
+		int x, y;
+		char * str = mousePosToFieldPos(mx, my, w, h, x, y);
+		if (str == NULL)
+		{
+			showMosePosWithGraph(field, "非法位置");
+		}
+		else
+		{
+			showMosePosWithGraph(field, str);
+			delete[] str;
+		}
+	}
+
+	showMsgWitGraph(field, "按回车键退出...");
+	waitPressEnter();
+	uninitMineField(field);
+}
+
+
+void launchMode_7(int w, int h, int mineCount)
+{
+	MineField* field = initMineField(w, h, mineCount);
+
+	InitGraph(field);
+
+	while (true)
+	{
+		int mx, my, ma, k1, k2;
+		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
+
+		int x, y;
+		char* str = mousePosToFieldPos(mx, my, w, h, x, y);
+		if (str == NULL)
+		{
+			showMosePosWithGraph(field, "非法位置");
+			continue;
+		}
+
+		showMosePosWithGraph(field, str);
+		delete[] str;
+
+		if (ma == MOUSE_LEFT_BUTTON_CLICK)
+		{
+
+		}
+	}
+
+	showMsgWitGraph(field, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
