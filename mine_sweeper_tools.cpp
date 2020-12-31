@@ -1,122 +1,84 @@
 #include "cmd_console_tools.h"
 #include "mine_sweeper.h"
 #include <string.h>
-#include <stdio.h>
 #include <Windows.h>
 
-int waitKeyDown(int w, int h, char& flag, int& x, int& y)
+bool keycodeToControlKey(int key, char& colKey)
 {
-	int mx, my, ma, k1 = 0x7FFFFFFF, k2;
-	bool isQuit = false;
-	int ret = 0;
-	y = 0x7FFFFFFF;
-
-	while (!isQuit)
+	switch (key)
 	{
-		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
-		switch (k1)
-		{
-		case '!':
-			flag = '!';
-			isQuit = true;
-			break;
+	case '&':
+	case '!':
+	case '#':
+	case 'q':
+		colKey = (char)key;
+		return true;
 
-		case '?':
-			flag = '?';
-			isQuit = true;
-			break;
+	case 'Q':
+		colKey = 'q';
+		return true;
 
-		case '~':
-			flag = ' ';
-			isQuit = true;
-			break;
-
-		case 'Q':
-		case 'q':
-			return -1;
-
-		case ' ':
-			return 1;
-
-		default:
-			if (k1 >= 'A' && k1 < 'A' + (int)h)
-			{
-				cct_getxy(mx, my);
-				cct_showch(mx, my, k1);
-				y = k1 - 'A';
-				isQuit = true;
-			}
-			continue;
-		}
-
-		cct_getxy(mx, my);
-		cct_showch(mx, my, k1);
+	default:
+		break;
 	}
 
-	if (y == 0x7FFFFFFF)
-	{
-		while (k1 < 'A' || k1 >= 'A' + (int)h)
-			cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
-
-		cct_getxy(mx, my);
-		cct_showch(mx, my, k1);
-		y = k1 - 'A';
-		ret = 2;
-	}
-
-	k1 = 0x7FFFFFFF;
-	while (true)
-	{
-		cct_read_keyboard_and_mouse(mx, my, ma, k1, k2);
-		if (w > 9)
-		{
-			if (k1 >= '1' && k1 <= '9')
-			{
-				x = k1 - '1';
-				cct_getxy(mx, my);
-				cct_showch(mx, my, k1);
-				return ret;
-			}
-			else if (k1 <= 'a' + (int)w - 9 && k1 >= 'a')
-			{
-				x = k1 - 'a' + 9;
-				cct_getxy(mx, my);
-				cct_showch(mx, my, k1);
-				return ret;
-			}
-		}
-		else
-		{
-			if (k1 >= '1' && k1 <= '9')
-			{
-				x = k1 - '1';
-				cct_getxy(mx, my);
-				cct_showch(mx, my, k1);
-				return ret;
-			}
-		}
-	}
-
-	x = y = 0;
-	return ret;
+	return false;
 }
 
-char* mousePosToFieldPos(int mx, int my, int fw, int fh, int& fx, int& fy)
+bool keycodeToFieldRow(int fh, int key, int& row)
+{
+	if (key >= 'A' && key < 'A' + fh)
+	{
+		row = key - 'A';
+		return true;
+	}
+
+	return false;
+}
+
+bool keycodeToFieldCol(int fw, int key, int& col)
+{
+	if (key >= '1' && key < '1' + fw)
+	{
+		col = key - '1';
+		return true;
+	}
+
+	if (key >= 'a' && key < fw - 9 + 'a')
+	{
+		col = key - 'a' + 9;
+		return true;
+	}
+
+	return false;
+}
+
+bool mousePosToFieldPos(int mx, int my, int fw, int fh, int& fx, int& fy)
 {
 	mx -= 2;
-	my -= 2;
+	my -= 3;
 
 	if (mx / 6 >= fw || mx % 6 < 2 || my / 3 >= fh || my % 3 < 1)
-		return NULL;
+		return false;
 
 	fx = mx / 6;
 	fy = my / 3;
 
-	char *str = new char[32];
-	char sx = fx < 9 ? fx + '1' : fx - 9 + 'a';
-	char sy = fy + 'A';
-	sprintf_s(str, 32, "当前位置：%c, %c", sy, sx);
-	return str;
+	return true;
+}
+
+void showHeadMsgWithStrView(const char* str)
+{
+	cct_showstr(0, 0, str);
+}
+
+void showRearMsgWithStrView(MineField* field, int row, const char* str)
+{
+	int w, h;
+	FieldSize(field, w, h);
+
+	int y = h + 3 + row;
+	cct_showstr(0, y, str);
 }
 
 void waitPressEnter()
@@ -128,11 +90,4 @@ void waitPressEnter()
 		if (k1 == 0x0D)
 			break;
 	}
-}
-
-char* timeToSecString(uint64_t ms)
-{
-	char* str = new char[32];
-	sprintf_s(str, 32, "当前时间%.3f秒", (int)ms / 1000.0f);
-	return str;
 }

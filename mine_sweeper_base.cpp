@@ -71,7 +71,8 @@ MineField* initMineField(int w, int h, int mineCount)
 	field->field = new char[w * h];
 	memset(field->field, '0', w * h * sizeof(char));
 
-	field->status = new char[w * h]();
+	field->status = new char[w * h];
+	memset(field->status, ' ', w * h * sizeof(char));
 
 	field->w = w;
 	field->h = h;
@@ -156,6 +157,9 @@ int clear(MineField* field, int x, int y, CLEAR_CALLBACK callback)
 		field->inited = true;
 	}
 
+	if (*(field->status + y * field->w + x) == 0)
+		return 0;
+
 	if (*(field->field + y * field->w + x) == '*')
 	{
 		*(field->status + y * field->w + x) = 0;
@@ -163,7 +167,7 @@ int clear(MineField* field, int x, int y, CLEAR_CALLBACK callback)
 		return -1;
 	}
 
-	if (*(field->field + y * field->w + x) > '0' && *(field->status + y * field->w + x) != ' ')
+	if (*(field->field + y * field->w + x) > '0' && *(field->status + y * field->w + x) != 0)
 	{
 		*(field->status + y * field->w + x) = 0;
 		callback(field, x, y, *(field->field + y * field->w + x));
@@ -171,10 +175,7 @@ int clear(MineField* field, int x, int y, CLEAR_CALLBACK callback)
 		if (field->safeZone == 0)
 			return 1;
 		return 0;
-	}
-
-	if (*(field->status + y * field->w + x) == ' ')
-		return 0;
+	}	
 
 	*(field->status + y * field->w + x) = 0;
 	callback(field, x, y, *(field->field + y * field->w + x));
@@ -189,7 +190,7 @@ int clear(MineField* field, int x, int y, CLEAR_CALLBACK callback)
 			if (x + offX >= 0 && x + offX < field->w &&
 				y + offY >= 0 && y + offY < field->h)
 			{
-				if (clear(field, x + offX, y + offY) == 1)
+				if (clear(field, x + offX, y + offY, callback) == 1)
 					return 1;
 			}
 		}
@@ -198,9 +199,9 @@ int clear(MineField* field, int x, int y, CLEAR_CALLBACK callback)
 	return 0;
 }
 
-void setStatus(MineField* field, int x, int y, char status)
+void setFlag(MineField* field, int x, int y, char status)
 {
-	if ((*(field->status + y * field->w + x)) != ' ' && status != ' ')
+	if ((*(field->status + y * field->w + x)) != 0 && status != 0)
 		(*(field->status + y * field->w + x)) = status;
 }
 

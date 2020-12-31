@@ -10,6 +10,9 @@ int showMainMenu()
 	int select = -1;
 	int mX, mY, key2, mAction;
 
+	cct_setcursor(CURSOR_INVISIBLE);
+	cct_setconsoleborder(75, 28);
+
 	cct_cls();
 
 	cct_showstr(0, 0, "---------------------------");
@@ -39,6 +42,7 @@ void showLevelMenu(int& w, int& h, int& mineCount)
 	int mX, mY, key2, mAction;
 
 	cct_cls();
+	cct_setcolor();
 
 	cct_showstr(0, 0, "请选择难度:");
 	cct_showstr(2, 1, "1.初级（9*9   - 10颗雷）");
