@@ -67,12 +67,12 @@ bool mousePosToFieldPos(int mx, int my, int fw, int fh, int& fx, int& fy)
 	return true;
 }
 
-void showHeadMsgWithStrView(const char* str)
+void strView_headMsg(const char* str)
 {
 	cct_showstr(0, 0, str);
 }
 
-void showRearMsgWithStrView(MineField* field, int row, const char* str)
+void strView_rearMsg(MineField* field, int row, const char* str)
 {
 	int w, h;
 	FieldSize(field, w, h);

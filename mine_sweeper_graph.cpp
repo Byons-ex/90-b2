@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
-void initGraph(MineField* field)
+void graph_init(MineField* field)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -103,12 +103,12 @@ void initGraph(MineField* field)
 	{
 		for (y = 0; y < h; ++y)
 		{
-			updateGraphGrid(field, x, y, ' ');
+			graph_updateGrid(field, x, y, ' ');
 		}
 	}
 }
 
-void updateGraphGrid(MineField* field, int x, int y, char stuff)
+void graph_updateGrid(MineField* field, int x, int y, char stuff)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -154,7 +154,7 @@ void updateGraphGrid(MineField* field, int x, int y, char stuff)
 	}
 }
 
-void showEndMsgWithGraph(MineField* field, const char* str)
+void graph_endMsg(MineField* field, const char* str)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -163,7 +163,7 @@ void showEndMsgWithGraph(MineField* field, const char* str)
 }
 
 
-void showMosePosWithGraph(MineField* field, int x, int y)
+void graph_mousePos(MineField* field, int x, int y)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -190,7 +190,7 @@ void showMosePosWithGraph(MineField* field, int x, int y)
 	delete[] spaceFill;
 }
 
-void showEndTimeWithGraph(MineField* field, uint64_t endTime)
+void graph_endTime(MineField* field, uint64_t endTime)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -203,7 +203,7 @@ void showEndTimeWithGraph(MineField* field, uint64_t endTime)
 	cct_gotoxy(6 * w + 5, 3 * h + 7);
 }
 
-void showTipMsgWithGraph(MineField* field, const char *tipStr)
+void graph_tipMsg(MineField* field, const char *tipStr)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -211,7 +211,7 @@ void showTipMsgWithGraph(MineField* field, const char *tipStr)
 	cct_showstr(6 * w + 5 - strlen(tipStr), 3 * h + 5, tipStr);
 }
 
-void showCurrTimeWithGraph(MineField* field, uint64_t msTime)
+void graph_currentTime(MineField* field, uint64_t msTime)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -228,7 +228,7 @@ void showCurrTimeWithGraph(MineField* field, uint64_t msTime)
 	delete[] spaceFill;
 }
 
-void showRemianMineWithGraph(MineField* field, int remainCount)
+void graph_remainMines(MineField* field, int remainCount)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -245,7 +245,7 @@ void showRemianMineWithGraph(MineField* field, int remainCount)
 	delete[] spaceFill;
 }
 
-void showResultWithGraph(MineField* field, const char* resultStr)
+void graph_result(MineField* field, const char* resultStr)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -257,7 +257,7 @@ void showResultWithGraph(MineField* field, const char* resultStr)
 	cct_showstr(0, 3 * h + 4, spaceFill);
 }
 
-void initStrView(MineField* field)
+void strView_init(MineField* field)
 {
 	int w, h;
 	FieldSize(field, w, h);
@@ -302,7 +302,7 @@ void initStrView(MineField* field)
 	}
 }
 
-void updateStrViewGrid_1(MineField* field, int x, int y, char stuff)
+void strView_updateGrid_1(MineField* field, int x, int y, char stuff)
 {
 	x = 3 + x * 2;
 	y = 3 + y;
@@ -315,7 +315,7 @@ void updateStrViewGrid_1(MineField* field, int x, int y, char stuff)
 	cct_gotoxy(curX, curY);
 }
 
-void updateStrViewGrid_2(MineField* field, int x, int y, char stuff)
+void strView_updateGrid_2(MineField* field, int x, int y, char stuff)
 {
 	x = 3 + x * 2;
 	y = 3 + y;

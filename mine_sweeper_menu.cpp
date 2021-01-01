@@ -1,19 +1,37 @@
 #include "cmd_console_tools.h"
 #include "mine_sweeper.h"
 
-#include <iostream>
-
-using namespace std;
+#include <memory.h>
 
 int showMainMenu()
 {
 	int select = -1;
 	int mX, mY, key2, mAction;
 
+	cct_cls();
 	cct_setcursor(CURSOR_INVISIBLE);
 	cct_setconsoleborder(75, 28);
 
-	cct_cls();
+	/*
+	* 我遇到了一个奇怪的BUG，该BUG导致第一次调用showMainMenu时，控制台未显示字符串的空区域会变成黄色
+	* 只有第一次调用showMainMenu时会发生，而第一次调用showMainMenu，整个程序直到这里只调用过：
+	* 
+	* 于mian函数中：
+	*	cct_setfontsize("Terminal", 20, 10);
+	* 
+	* 于本函数在中：
+	*	cct_cls();
+	*	cct_setcursor(CURSOR_INVISIBLE);
+	*	cct_setconsoleborder(75, 28);
+	* 
+	* 我唯一的猜测只能是cmd.exe的某些BUG
+	* 目前我只能使用下面的代码隐藏这个问题
+	*/
+	char fill[76];
+	memset(fill, ' ', 76);
+	fill[75] = '\0';
+	for (int y = 0; y < 28; ++y)
+		cct_showstr(0, y, fill);
 
 	cct_showstr(0, 0, "---------------------------");
 	cct_showstr(0, 1, "1.选择难度并显示内部数组");

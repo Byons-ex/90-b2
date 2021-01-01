@@ -6,7 +6,7 @@
 
 int main(void)
 {
-	cct_setfontsize("Terminal", 16, 8);
+	cct_setfontsize("Terminal", 20, 10);
 	int model = showMainMenu();
 
 	LAUNCH_MODE modes[] = { launchMode_1,
@@ -36,20 +36,20 @@ void launchMode_1(int w, int h, int mineCount)
 {
 	cct_setcursor(CURSOR_VISIBLE_NORMAL);
 	MineField* mineField = initMineField(w, h, mineCount);
-	initStrView(mineField);
-	clear(mineField, 0, 0, updateStrViewGrid_1);
+	strView_init(mineField);
+	clear(mineField, 0, 0, strView_updateGrid_1);
 
 	for (int x = 0; x < w; ++x)
 	{
 		for (int y = 0; y < h; ++y)
 		{
-			updateStrViewGrid_1(mineField, x, y, internalGrid(mineField, x, y));
+			strView_updateGrid_1(mineField, x, y, internalGrid(mineField, x, y));
 		}
 	}
 
-	showHeadMsgWithStrView("内部数组：");
+	strView_headMsg("内部数组：");
 
-	showRearMsgWithStrView(mineField, 2, "按回车键退出...");
+	strView_rearMsg(mineField, 2, "按回车键退出...");
 
 	waitPressEnter();
 	uninitMineField(mineField);
@@ -60,9 +60,9 @@ void launchMode_2(int w, int h, int mineCount)
 	cct_setcursor(CURSOR_VISIBLE_NORMAL);
 	MineField* field = initMineField(w, h, mineCount);
 
-	initStrView(field);
-	showHeadMsgWithStrView("字符界面：");
-	showRearMsgWithStrView(field, 2, "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
+	strView_init(field);
+	strView_headMsg("字符界面：");
+	strView_rearMsg(field, 2, "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
 
 	int x = -1, y = -1;
 	while (true)
@@ -99,9 +99,9 @@ void launchMode_2(int w, int h, int mineCount)
 	}
 	
 	if(x != -1 && y != -1)
-		clear(field, x, y, updateStrViewGrid_2);
+		clear(field, x, y, strView_updateGrid_2);
 
-	showRearMsgWithStrView(field, 3, "按回车键退出...");
+	strView_rearMsg(field, 3, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -111,9 +111,9 @@ void launchMode_3(int w, int h, int mineCount)
 	cct_setcursor(CURSOR_VISIBLE_NORMAL);
 	MineField* field = initMineField(w, h, mineCount);
 
-	initStrView(field);
-	showHeadMsgWithStrView("字符界面：");
-	showRearMsgWithStrView(field, 2, "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
+	strView_init(field);
+	strView_headMsg("字符界面：");
+	strView_rearMsg(field, 2, "输入位置的行列坐标（先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
 
 	int x = -1, y = -1;
 	int ret = 0;
@@ -149,7 +149,7 @@ void launchMode_3(int w, int h, int mineCount)
 			cct_showstr(mx - 1, my, "   ");
 			cct_gotoxy(mx - 1, my);
 
-			ret = clear(field, x, y, updateStrViewGrid_2);
+			ret = clear(field, x, y, strView_updateGrid_2);
 			if (ret != 0)
 				break;
 
@@ -159,15 +159,15 @@ void launchMode_3(int w, int h, int mineCount)
 
 	if (ret == -1)
 	{
-		showRearMsgWithStrView(field, 3, "真可惜，失败了            ");
+		strView_rearMsg(field, 3, "真可惜，失败了            ");
 	}
 
 	if (ret == 1)
 	{
-		showRearMsgWithStrView(field, 3, "恭喜你，胜利了            ");
+		strView_rearMsg(field, 3, "恭喜你，胜利了            ");
 	}
 
-	showRearMsgWithStrView(field, 4, "按回车键退出...");
+	strView_rearMsg(field, 4, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -177,12 +177,12 @@ void launchMode_4(int w, int h, int mineCount)
 	cct_setcursor(CURSOR_VISIBLE_NORMAL);
 	MineField* field = initMineField(w, h, mineCount);
 
-	initStrView(field);
-	showHeadMsgWithStrView("字符界面：");
-	showRearMsgWithStrView(field, 3, "特殊输入说明：& - 游戏已运行时间(单字符即可，不需要加坐标)");
-	showRearMsgWithStrView(field, 4, "              ! - 标记该坐标为雷(例：!E3)");
-	showRearMsgWithStrView(field, 5, "              # - 取消标记      (例：#E3)");
-	showRearMsgWithStrView(field, 6, "请输入（坐标必须先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
+	strView_init(field);
+	strView_headMsg("字符界面：");
+	strView_rearMsg(field, 3, "特殊输入说明：& - 游戏已运行时间(单字符即可，不需要加坐标)");
+	strView_rearMsg(field, 4, "              ! - 标记该坐标为雷(例：!E3)");
+	strView_rearMsg(field, 5, "              # - 取消标记      (例：#E3)");
+	strView_rearMsg(field, 6, "请输入（坐标必须先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：");
 
 	uint64_t startTime = GetTickCount64();
 
@@ -210,7 +210,7 @@ void launchMode_4(int w, int h, int mineCount)
 				char* timeStr = new char[32];
 				uint64_t currTime = GetTickCount64() - startTime;
 				sprintf_s(timeStr, 32, "当前时间： %.3f秒", (int)currTime / 1000.0f);
-				showRearMsgWithStrView(field, 2, timeStr);
+				strView_rearMsg(field, 2, timeStr);
 				delete[] timeStr;
 
 				cct_gotoxy(mx, my);
@@ -237,7 +237,7 @@ void launchMode_4(int w, int h, int mineCount)
 		{
 			x = col;
 
-			showRearMsgWithStrView(field, 6, "请输入（坐标必须先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：   ");
+			strView_rearMsg(field, 6, "请输入（坐标必须先行后列，严格区分大小写，例：G1/Af，按Q/q退出）：   ");
 			cct_getxy(mx, my);
 			cct_gotoxy(mx - 3, my);
 
@@ -246,13 +246,13 @@ void launchMode_4(int w, int h, int mineCount)
 				if (controlKey == '!')
 				{
 					setFlag(field, x, y, '!');
-					updateStrViewGrid_2(field, x, y, '!');
+					strView_updateGrid_2(field, x, y, '!');
 				}
 
 				if (controlKey == '#')
 				{
 					setFlag(field, x, y, ' ');
-					updateStrViewGrid_2(field, x, y, ' ');
+					strView_updateGrid_2(field, x, y, ' ');
 				}
 
 				controlKey = -1;
@@ -260,7 +260,7 @@ void launchMode_4(int w, int h, int mineCount)
 				continue;
 			}
 
-			ret = clear(field, x, y, updateStrViewGrid_2);
+			ret = clear(field, x, y, strView_updateGrid_2);
 			if (ret != 0)
 				break;
 
@@ -270,15 +270,15 @@ void launchMode_4(int w, int h, int mineCount)
 
 	if (ret == -1)
 	{
-		showRearMsgWithStrView(field, 7, "真可惜，失败了            ");
+		strView_rearMsg(field, 7, "真可惜，失败了            ");
 	}
 
 	if (ret == 1)
 	{
-		showRearMsgWithStrView(field, 7, "恭喜你，胜利了            ");
+		strView_rearMsg(field, 7, "恭喜你，胜利了            ");
 	}
 
-	showRearMsgWithStrView(field, 8, "按回车键退出...");
+	strView_rearMsg(field, 8, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -287,19 +287,19 @@ void launchMode_5(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
-	initGraph(field);
+	graph_init(field);
 	
-	clear(field, 0, 0, updateGraphGrid);
+	clear(field, 0, 0, graph_updateGrid);
 
 	for (int x = 0; x < w; ++x)
 	{
 		for(int y = 0; y < h; ++y)
 		{
-			updateGraphGrid(field, x, y, internalGrid(field, x, y));
+			graph_updateGrid(field, x, y, internalGrid(field, x, y));
 		}
 	}
 
-	showEndMsgWithGraph(field, "按回车键退出...");
+	graph_endMsg(field, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -308,7 +308,7 @@ void launchMode_6(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
-	initGraph(field);
+	graph_init(field);
 
 	while (true)
 	{
@@ -322,15 +322,15 @@ void launchMode_6(int w, int h, int mineCount)
 		bool succeed = mousePosToFieldPos(mx, my, w, h, x, y);
 		if (!succeed)
 		{
-			showMosePosWithGraph(field, -1, -1);
+			graph_mousePos(field, -1, -1);
 		}
 		else
 		{
-			showMosePosWithGraph(field, x, y);
+			graph_mousePos(field, x, y);
 		}
 	}
 
-	showEndMsgWithGraph(field, "按回车键退出...");
+	graph_endMsg(field, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -339,7 +339,7 @@ void launchMode_7(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
-	initGraph(field);
+	graph_init(field);
 
 	while (true)
 	{
@@ -350,20 +350,20 @@ void launchMode_7(int w, int h, int mineCount)
 		bool succeed = mousePosToFieldPos(mx, my, w, h, x, y);
 		if (!succeed)
 		{
-			showMosePosWithGraph(field, -1, -1);
+			graph_mousePos(field, -1, -1);
 			continue;
 		}
 
-		showMosePosWithGraph(field, x, y);
+		graph_mousePos(field, x, y);
 
 		if (ma == MOUSE_LEFT_BUTTON_CLICK)
 		{
-			clear(field, x, y, updateGraphGrid);
+			clear(field, x, y, graph_updateGrid);
 			break;
 		}
 	}
 
-	showEndMsgWithGraph(field, "按回车键退出...");
+	graph_endMsg(field, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -372,7 +372,7 @@ void launchMode_8(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
-	initGraph(field);
+	graph_init(field);
 
 	int ret = 0;
 
@@ -391,15 +391,15 @@ void launchMode_8(int w, int h, int mineCount)
 		bool succeed = mousePosToFieldPos(mx, my, w, h, x, y);
 		if (!succeed)
 		{
-			showMosePosWithGraph(field, -1, -1);
+			graph_mousePos(field, -1, -1);
 			continue;
 		}
 
-		showMosePosWithGraph(field, x, y);
+		graph_mousePos(field, x, y);
 
 		if (ma == MOUSE_LEFT_BUTTON_CLICK)
 		{
-			ret = clear(field, x, y, updateGraphGrid);
+			ret = clear(field, x, y, graph_updateGrid);
 			if (ret != 0)
 				break;
 		}
@@ -411,15 +411,15 @@ void launchMode_8(int w, int h, int mineCount)
 			{
 			case '?':
 				setFlag(field, x, y, '!');
-				updateGraphGrid(field, x, y, '!');
+				graph_updateGrid(field, x, y, '!');
 				break;
 			case '!':
 				setFlag(field, x, y, ' ');
-				updateGraphGrid(field, x, y, ' ');
+				graph_updateGrid(field, x, y, ' ');
 				break;
 			case ' ':
 				setFlag(field, x, y, '?');
-				updateGraphGrid(field, x, y, '?');
+				graph_updateGrid(field, x, y, '?');
 				break;
 			default:
 				break;
@@ -429,15 +429,15 @@ void launchMode_8(int w, int h, int mineCount)
 
 	if (ret == -1)
 	{
-		showResultWithGraph(field, "你输了， 下次努力...");
+		graph_result(field, "你输了， 下次努力...");
 	}
 
 	if (ret == 1)
 	{
-		showResultWithGraph(field, "你赢了...");
+		graph_result(field, "你赢了...");
 	}
 
-	showEndMsgWithGraph(field, "按回车键退出...");
+	graph_endMsg(field, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
@@ -446,17 +446,17 @@ void launchMode_9(int w, int h, int mineCount)
 {
 	MineField* field = initMineField(w, h, mineCount);
 
-	initGraph(field);
+	graph_init(field);
 
 	uint64_t startTime = GetTickCount64();
-	showCurrTimeWithGraph(field, 0);
+	graph_currentTime(field, 0);
 
 	int ret = 0;
 
 	int dangerFlagCount = 0;
-	showRemianMineWithGraph(field, mineCount);
+	graph_remainMines(field, mineCount);
 
-	showTipMsgWithGraph(field, "按ESC结束，按空格更新游戏时间");
+	graph_tipMsg(field, "按ESC结束，按空格更新游戏时间");
 
 	while (true)
 	{
@@ -471,22 +471,22 @@ void launchMode_9(int w, int h, int mineCount)
 
 		if (k1 == VK_SPACE)
 		{
-			showCurrTimeWithGraph(field, GetTickCount64() - startTime);
+			graph_currentTime(field, GetTickCount64() - startTime);
 		}
 
 		int x, y;
 		bool succeed = mousePosToFieldPos(mx, my, w, h, x, y);
 		if (!succeed)
 		{
-			showMosePosWithGraph(field, -1, -1);
+			graph_mousePos(field, -1, -1);
 			continue;
 		}
 
-		showMosePosWithGraph(field, x, y);
+		graph_mousePos(field, x, y);
 
 		if (ma == MOUSE_LEFT_BUTTON_CLICK)
 		{
-			ret = clear(field, x, y, updateGraphGrid);
+			ret = clear(field, x, y, graph_updateGrid);
 			if (ret != 0)
 				break;
 		}
@@ -498,21 +498,21 @@ void launchMode_9(int w, int h, int mineCount)
 			{
 			case '?':
 				setFlag(field, x, y, '!');
-				updateGraphGrid(field, x, y, '!');
+				graph_updateGrid(field, x, y, '!');
 				++dangerFlagCount;
-				showRemianMineWithGraph(field, mineCount - dangerFlagCount);
+				graph_remainMines(field, mineCount - dangerFlagCount);
 				break;
 
 			case '!':
 				setFlag(field, x, y, ' ');
-				updateGraphGrid(field, x, y, ' ');
+				graph_updateGrid(field, x, y, ' ');
 				--dangerFlagCount;
-				showRemianMineWithGraph(field, mineCount - dangerFlagCount);
+				graph_remainMines(field, mineCount - dangerFlagCount);
 				break;
 
 			case ' ':
 				setFlag(field, x, y, '?');
-				updateGraphGrid(field, x, y, '?');
+				graph_updateGrid(field, x, y, '?');
 				break;
 
 			default:
@@ -523,17 +523,17 @@ void launchMode_9(int w, int h, int mineCount)
 
 	if (ret == -1)
 	{
-		showResultWithGraph(field, "你输了， 下次努力...");
+		graph_result(field, "你输了， 下次努力...");
 	}
 
 	if (ret == 1)
 	{
-		showRemianMineWithGraph(field, 0);
-		showResultWithGraph(field, "你赢了...");
+		graph_remainMines(field, 0);
+		graph_result(field, "你赢了...");
 	}
 	
-	showEndTimeWithGraph(field, GetTickCount64() - startTime);
-	showEndMsgWithGraph(field, "按回车键退出...");
+	graph_endTime(field, GetTickCount64() - startTime);
+	graph_endMsg(field, "按回车键退出...");
 	waitPressEnter();
 	uninitMineField(field);
 }
