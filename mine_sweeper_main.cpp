@@ -6,7 +6,7 @@
 
 int main(void)
 {
-	cct_setfontsize("Terminal", 20, 10);
+	cct_setfontsize("Terminal", 16, 8);
 	int model = showMainMenu();
 
 	LAUNCH_MODE modes[] = { launchMode_1,
